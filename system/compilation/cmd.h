@@ -1,6 +1,5 @@
 #pragma once
-#include <vector>
-#include <filesystem>
+#include "java_project.h"
 
 struct cmd_error
 {
@@ -17,18 +16,16 @@ struct cmd_error
 
 cmd_error ranCmd(std::string);
 
-std::string createClass(std::vector<std::filesystem::path>, std::filesystem::path);
+std::string createClass(java_project);
 
-bool createManifest(std::filesystem::path, const char*, double);
+bool createManifest(java_project, std::filesystem::path);
 
 std::string createZip(std::filesystem::path);
 
 std::string createJar(std::filesystem::path, const char*);
 
-cmd_error compilation(std::filesystem::path, std::filesystem::path);
+cmd_error compilation(java_project);
 
-cmd_error bild(std::filesystem::path, std::filesystem::path, std::filesystem::path, double, const char*);
+cmd_error bild(java_project, const char*);
 
-cmd_error runJar(std::filesystem::path, std::filesystem::path, std::filesystem::path, double, const char*);
-
-void parcJavaClass(std::filesystem::path, std::vector<std::filesystem::path>*);
+cmd_error runJar(java_project, const char*);
