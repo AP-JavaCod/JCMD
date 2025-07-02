@@ -1,5 +1,4 @@
 #include "cmd.h"
-#include <string>
 #include <fstream>
 #include <iostream>
 
@@ -33,20 +32,20 @@ cmd_error ranCmd(std::string cmd) {
 }
 
 
-std::string createClass(std::vector<std::filesystem::path> javaClass, std::filesystem::path path) {
-	std::string cmd = "javac -d " + path.string();
-	for (const auto& i : javaClass) {
+std::string createClass(java_project project) {
+	std::string cmd = "javac -d " + project.nameProject.string() + "\\bild\\" + project.nameProject.filename().string();
+	for (const auto& i : project.javaClasses) {
 		cmd += " " + i.string();
 	}
 	return cmd;
 }
 
-bool createManifest(std::filesystem::path der, const char* mainClass, double version) {
+bool createManifest(java_project project, std::filesystem::path dir) {
 	std::ofstream out;
-	out.open(der);
+	out.open(dir);
 	if (out.is_open()) {
-		out << "Manifest-Version: " << version << "\n";
-		out << "Main-Class: " << mainClass << "\n\n";
+		out << "Manifest-Version: " << project.version << "\n";
+		out << "Main-Class: " << getFormatPath(project.mainClass, project.nameProject.string() + "\\src") << "\n\n";
 		out.close();
 		return true;
 	}
@@ -66,25 +65,19 @@ std::string createJar(std::filesystem::path dir, const char* name) {
 	return std::string("rename " + dir.string() + ".zip " + name);
 }
 
-cmd_error compilation(std::filesystem::path project, std::filesystem::path dir) {
-	std::vector <std::filesystem::path> data;
-	parcJavaClass(project.string() + "\\src", &data);
-	return ranCmd(createClass(data, dir));
+cmd_error compilation(java_project project) {
+	return ranCmd(createClass(project));
 }
 
-cmd_error bild(std::filesystem::path project, std::filesystem::path dir, std::filesystem::path mainFile, double version, const char* nameProject) {
-	cmd_error e_cmp = compilation(project, dir);
+cmd_error bild(java_project projet, const char* nameProject) {
+	cmd_error e_cmp = compilation(projet);
 	if (e_cmp.is_error) {
 		return e_cmp;
 	}
 
+	std::filesystem::path dir = projet.nameProject.string() + "\\bild\\" + projet.nameProject.filename().string();
 	std::filesystem::create_directories(dir.string() + "\\META-INF");
-	std::string mainName = mainFile.filename().string();
-	mainName.resize(mainName.size() - 5, ' ');
-	for (std::filesystem::path i = mainFile.parent_path(); i.filename() != "src"; i = i.parent_path()) {
-		mainName = i.filename().string() + "." + mainName;
-	}
-	createManifest(dir.string() + "\\META-INF\\MANIFEST.MF", mainName.c_str(), version);
+	createManifest(projet, dir.string() + "\\META-INF\\MANIFEST.MF");
 
 	cmd_error e_zip = ranCmd(createZip(dir));
 	if (e_zip.is_error) {
@@ -95,23 +88,11 @@ cmd_error bild(std::filesystem::path project, std::filesystem::path dir, std::fi
 	return e_jar;
 }
 
-cmd_error runJar(std::filesystem::path project, std::filesystem::path dir, std::filesystem::path mainFile, double version, const char* projectNaim) {
-	cmd_error e_bild = bild(project, dir, mainFile, version, projectNaim);
+cmd_error runJar(java_project project, const char* projectNaim) {
+	cmd_error e_bild = bild(project, projectNaim);
 	if (e_bild.is_error) {
 		return e_bild;
 	}
-	return ranCmd(std::string("java -jar " + dir.parent_path().string() + "\\" + projectNaim));
-}
-
-void parcJavaClass(std::filesystem::path der, std::vector<std::filesystem::path>* data) {
-	for (const auto &i : std::filesystem::directory_iterator(der)) {
-		std::filesystem::path fil = i.path();
-		if (std::filesystem::is_directory(fil)) {
-			parcJavaClass(fil, data);
-		}
-		else if(fil.extension() == ".java")
-		{
-			data->push_back(fil);
-		}
-	}
+	std::filesystem::path dir = project.nameProject.string() + "\\bild";
+	return ranCmd("java -jar " + dir.string() + "\\" + projectNaim);
 }
