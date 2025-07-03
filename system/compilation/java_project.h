@@ -3,16 +3,28 @@
 #include <filesystem>
 #include <string>
 
+struct java_project;
+
+struct java_build {
+
+	java_build(){}
+
+	java_project* project;
+	std::filesystem::path build;
+	std::filesystem::path mainClass;
+	double version;
+
+};
+
 struct java_project
 {
-	java_project(std::filesystem::path namePriject, std::filesystem::path, double version);
-	java_project(std::filesystem::path nameProject, std::filesystem::path, std::filesystem::path, double);
+	java_project(std::filesystem::path);
 
 	std::filesystem::path nameProject;
-	std::filesystem::path bild;
-	std::filesystem::path mainClass;
 	std::vector<std::filesystem::path> javaClasses;
-	double version;
+
+	java_build setBuild(std::filesystem::path, double version);
+	java_build setBuild(std::filesystem::path, std::filesystem::path, double version);
 
 private:
 
