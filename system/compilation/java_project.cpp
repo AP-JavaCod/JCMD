@@ -1,19 +1,25 @@
 #include "java_project.h"
 
-java_project::java_project(std::filesystem::path nameProject, std::filesystem::path mainClass, double version) {
+java_project::java_project(std::filesystem::path nameProject) {
 	this->nameProject = nameProject;
-	this->bild = nameProject.string() + "\\bild";
-	this->mainClass = mainClass;
-	this->version = version;
 	parsJavaClass(nameProject);
 }
 
-java_project::java_project(std::filesystem::path nameProject, std::filesystem::path bild, std::filesystem::path mainClass, double version) {
-	this->nameProject = nameProject;
-	this->bild = bild;
-	this->mainClass = mainClass;
-	this->version = version;
-	parsJavaClass(nameProject);
+java_build java_project::setBuild(std::filesystem::path mainClass, double version) {
+	java_build b;
+	b.project = this;
+	b.build = this->nameProject.string() + "\\bild";
+	b.mainClass = mainClass;
+	b.version = version;
+	return b;
+}
+java_build java_project::setBuild(std::filesystem::path build, std::filesystem::path mainClass, double version) {
+	java_build b;
+	b.project = this;
+	b.build = build;
+	b.mainClass = mainClass;
+	b.version = version;
+	return b;
 }
 
 void java_project::parsJavaClass(std::filesystem::path path) {
