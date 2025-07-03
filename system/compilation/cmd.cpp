@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-cmd_error::cmd_error(std::string error){
+cmd_error::cmd_error(std::string error) {
 	this->is_error = true;
 	this->error = error;
 }
@@ -32,22 +32,24 @@ cmd_error ranCmd(std::string cmd) {
 }
 
 
-std::string createClass(java_project project) {
-	std::filesystem::path dir = project.bild.string() + "\\" + project.nameProject.filename().string();
+std::string createClass(java_build javaBuild) {
+	java_project javaProject = *javaBuild.project;
+	std::filesystem::path dir = javaBuild.build.string() + "\\" + javaProject.nameProject.filename().string();
 	std::filesystem::remove_all(dir);
 	std::string cmd = "javac -d " + dir.string();
-	for (const auto& i : project.javaClasses) {
+	for (const auto& i : javaProject.javaClasses) {
 		cmd += " " + i.string();
 	}
 	return cmd;
 }
 
-bool createManifest(java_project project, std::filesystem::path dir) {
+bool createManifest(java_build javaBuild, std::filesystem::path dir) {
+	java_project javaProject = *javaBuild.project;
 	std::ofstream out;
 	out.open(dir);
 	if (out.is_open()) {
-		out << "Manifest-Version: " << project.version << "\n";
-		out << "Main-Class: " << getFormatPath(project.mainClass, project.nameProject.string() + "\\src") << "\n\n";
+		out << "Manifest-Version: " << javaBuild.version << "\n";
+		out << "Main-Class: " << getFormatPath(javaBuild.mainClass, javaProject.nameProject.string() + "\\src") << "\n\n";
 		out.close();
 		return true;
 	}
@@ -69,17 +71,17 @@ std::string createJar(std::filesystem::path dir, const char* name) {
 	return std::string("rename " + dir.string() + ".zip " + name);
 }
 
-cmd_error compilation(java_project project) {
+cmd_error compilation(java_build project) {
 	return ranCmd(createClass(project));
 }
 
-cmd_error bild(java_project projet, const char* nameProject) {
+cmd_error build(java_build projet, const char* nameProject) {
 	cmd_error e_cmp = compilation(projet);
 	if (e_cmp.is_error) {
 		return e_cmp;
 	}
 
-	std::filesystem::path dir = projet.bild.string() + "\\" + projet.nameProject.filename().string();
+	std::filesystem::path dir = projet.build.string() + "\\" + projet.project->nameProject.filename().string();
 	std::filesystem::create_directories(dir.string() + "\\META-INF");
 	createManifest(projet, dir.string() + "\\META-INF\\MANIFEST.MF");
 
@@ -92,10 +94,10 @@ cmd_error bild(java_project projet, const char* nameProject) {
 	return e_jar;
 }
 
-cmd_error runJar(java_project project, const char* projectNaim) {
-	cmd_error e_bild = bild(project, projectNaim);
+cmd_error runJar(java_build project, const char* projectNaim) {
+	cmd_error e_bild = build(project, projectNaim);
 	if (e_bild.is_error) {
 		return e_bild;
 	}
-	return ranCmd("java -jar " + project.bild.string() + "\\" + projectNaim);
+	return ranCmd("java -jar " + project.build.string() + "\\" + projectNaim);
 }
