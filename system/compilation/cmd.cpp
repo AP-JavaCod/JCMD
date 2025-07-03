@@ -33,7 +33,9 @@ cmd_error ranCmd(std::string cmd) {
 
 
 std::string createClass(java_project project) {
-	std::string cmd = "javac -d " + project.nameProject.string() + "\\bild\\" + project.nameProject.filename().string();
+	std::filesystem::path dir = project.nameProject.string() + "\\bild\\" + project.nameProject.filename().string();
+	std::filesystem::remove_all(dir);
+	std::string cmd = "javac -d " + dir.string();
 	for (const auto& i : project.javaClasses) {
 		cmd += " " + i.string();
 	}
@@ -62,6 +64,8 @@ std::string createZip(std::filesystem::path dir) {
 }
 
 std::string createJar(std::filesystem::path dir, const char* name) {
+	std::string fil = dir.parent_path().string() + "\\" + name;
+	remove(fil.c_str());
 	return std::string("rename " + dir.string() + ".zip " + name);
 }
 
