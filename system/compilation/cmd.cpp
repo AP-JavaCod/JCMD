@@ -33,7 +33,7 @@ cmd_error ranCmd(std::string cmd) {
 
 
 std::string createClass(java_project project) {
-	std::filesystem::path dir = project.nameProject.string() + "\\bild\\" + project.nameProject.filename().string();
+	std::filesystem::path dir = project.bild.string() + "\\" + project.nameProject.filename().string();
 	std::filesystem::remove_all(dir);
 	std::string cmd = "javac -d " + dir.string();
 	for (const auto& i : project.javaClasses) {
@@ -79,7 +79,7 @@ cmd_error bild(java_project projet, const char* nameProject) {
 		return e_cmp;
 	}
 
-	std::filesystem::path dir = projet.nameProject.string() + "\\bild\\" + projet.nameProject.filename().string();
+	std::filesystem::path dir = projet.bild.string() + "\\" + projet.nameProject.filename().string();
 	std::filesystem::create_directories(dir.string() + "\\META-INF");
 	createManifest(projet, dir.string() + "\\META-INF\\MANIFEST.MF");
 
@@ -97,6 +97,5 @@ cmd_error runJar(java_project project, const char* projectNaim) {
 	if (e_bild.is_error) {
 		return e_bild;
 	}
-	std::filesystem::path dir = project.nameProject.string() + "\\bild";
-	return ranCmd("java -jar " + dir.string() + "\\" + projectNaim);
+	return ranCmd("java -jar " + project.bild.string() + "\\" + projectNaim);
 }
