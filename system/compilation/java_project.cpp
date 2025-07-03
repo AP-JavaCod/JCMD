@@ -2,6 +2,15 @@
 
 java_project::java_project(std::filesystem::path nameProject, std::filesystem::path mainClass, double version) {
 	this->nameProject = nameProject;
+	this->bild = nameProject.string() + "\\bild";
+	this->mainClass = mainClass;
+	this->version = version;
+	parsJavaClass(nameProject);
+}
+
+java_project::java_project(std::filesystem::path nameProject, std::filesystem::path bild, std::filesystem::path mainClass, double version) {
+	this->nameProject = nameProject;
+	this->bild = bild;
 	this->mainClass = mainClass;
 	this->version = version;
 	parsJavaClass(nameProject);
