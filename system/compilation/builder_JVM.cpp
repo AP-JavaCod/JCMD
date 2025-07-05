@@ -38,3 +38,28 @@ JNIEXPORT jstring JNICALL Java_Builder_run(JNIEnv* env, jobject, jlong data, jst
 	std::string error = runJar(javaBuild, nameJAR).error;
 	return env->NewStringUTF(error.c_str());
 }
+
+JNIEXPORT jint JNICALL Java_Builder_sizeClasses(JNIEnv*, jobject, jlong data) {
+	java_project* project = reinterpret_cast<java_project*>(data);
+	return project->javaClasses.size();
+}
+
+JNIEXPORT jstring JNICALL Java_Builder_getClassFile(JNIEnv* env, jobject, jlong data, jint index) {
+	java_project* project = reinterpret_cast<java_project*>(data);
+	std::string name = project->javaClasses[index].string();
+	return env->NewStringUTF(name.c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_Builder_getClassFormat(JNIEnv* env, jobject, jlong data, jint index) {
+	java_project* project = reinterpret_cast<java_project*>(data);
+	std::filesystem::path path = project->javaClasses[index];
+	std::filesystem::path start = project->nameProject.string() + "\\src";
+	std::string name = getFormatPath(path, start);
+	return env->NewStringUTF(name.c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_Builder_getProjectFile(JNIEnv* env, jobject, jlong data) {
+	java_project* project = reinterpret_cast<java_project*>(data);
+	std::string name = project->nameProject.string();
+	return env->NewStringUTF(name.c_str());
+}
