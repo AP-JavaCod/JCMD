@@ -1,4 +1,4 @@
-include <jni.h>
+#include <jni.h>
 
 #ifndef _Included_Builder
 #define _Included_Builder
@@ -15,6 +15,14 @@ extern "C" {
 	JNIEXPORT jstring JNICALL Java_Builder_build(JNIEnv*, jobject, jlong, jstring, jstring, jdouble);
 
 	JNIEXPORT jstring JNICALL Java_Builder_run(JNIEnv*, jobject, jlong, jstring, jstring, jdouble);
+
+	JNIEXPORT jint JNICALL Java_Builder_sizeClasses(JNIEnv*, jobject, jlong);
+
+	JNIEXPORT jstring JNICALL Java_Builder_getClassFile(JNIEnv*, jobject, jlong, jint);
+
+	JNIEXPORT jstring JNICALL Java_Builder_getClassFormat(JNIEnv*, jobject, jlong, jint);
+
+	JNIEXPORT jstring JNICALL Java_Builder_getProjectFile(JNIEnv*, jobject, jlong);
 
 #ifdef __cplusplus
 }
