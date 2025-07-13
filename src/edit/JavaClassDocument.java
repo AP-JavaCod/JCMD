@@ -1,5 +1,6 @@
 package edit;
 
+import build.Builder;
 import data.FileManager;
 import edit.type.TypeJavaClass;
 
@@ -12,13 +13,15 @@ public class JavaClassDocument extends DefaultStyledDocument {
 
     private File fileClass;
     private String name;
+    private String paten;
     private String oldText;
     private boolean isMainClass;
-    TypeJavaClass typeJavaClass;
+    TypeJavaClass typeJavaClass = null;
 
     public JavaClassDocument(File file){
         fileClass = file;
         name = file.getName().split("\\.")[0];
+        paten = Builder.getPathClass(file);
         oldText = FileManager.reader(file);
         isMainClass = setMainClass();
         try {
@@ -32,6 +35,9 @@ public class JavaClassDocument extends DefaultStyledDocument {
                 typeJavaClass = c;
                 break;
             }
+        }
+        if (typeJavaClass == null){
+            typeJavaClass = TypeJavaClass.CLASS;
         }
     }
 
@@ -50,6 +56,10 @@ public class JavaClassDocument extends DefaultStyledDocument {
 
     public String getName() {
         return name;
+    }
+
+    public String getPaten() {
+        return paten;
     }
 
     public boolean isMainClass() {
