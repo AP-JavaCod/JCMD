@@ -1,6 +1,8 @@
 package visulization.component;
 
 import build.Builder;
+import edit.JavaClassDocument;
+import visulization.MenuFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,11 +15,9 @@ import java.util.List;
 
 public class PathPanel extends JPanel{
 
-    private final JTextArea cod;
 
-    public PathPanel(JTextArea cod) {
+    public PathPanel() {
         setLayout(new FlowLayout(FlowLayout.LEFT));
-        this.cod = cod;
         String[] f = Builder.getClassesFormat();
         CatalogProject catalog = new CatalogProject();
         String project = Builder.getProject().getPath() + "/src";
@@ -31,6 +31,8 @@ public class PathPanel extends JPanel{
     private static class Elements extends JPanel{
 
         private static final int d = 25;
+        protected final JLabel ICON;
+        protected final JLabel NAME;
 
         public Elements(ImageIcon icon, String name){
             setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -39,54 +41,43 @@ public class PathPanel extends JPanel{
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             g2.drawImage(icon.getImage(), 0, 0, d, d, null);
             g2.dispose();
-
-            add(new JLabel(new ImageIcon(bufferedImage)));
-            add(new JLabel(name));
+            ICON = new JLabel(new ImageIcon(bufferedImage));
+            NAME = new JLabel(name);
+            add(ICON);
+            add(NAME);
         }
 
     }
 
-    private class ClassElements extends Elements {
+    private static class ClassElements extends Elements {
 
-        public ClassElements(File file) {
-            super(new ImageIcon("./system/icon/java_class.png"), file.getName().split("\\.")[0]);
+        private static final ImageIcon MAIN_CLASS = new ImageIcon("./system/icon/main_class.png");
+        private static final ImageIcon JAVA_CLASS = new ImageIcon("./system/icon/java_class.png");
+
+        public ClassElements(JavaClassDocument file) {
+            super(file.isMainClass() ? MAIN_CLASS : JAVA_CLASS, file.getName());
+            NAME.setForeground(file.getTypeJavaClass().COLOR);
             addMouseListener(new MouseListener() {
 
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (SwingUtilities.isLeftMouseButton(e)) {
-                        try (FileReader reader = new FileReader(file)) {
-                            int c;
-                            StringBuilder code = new StringBuilder();
-                            while ((c = reader.read()) != -1) {
-                                code.append((char) c);
-                            }
-                            cod.setText(code.toString());
-                        } catch (IOException ex) {
-                            JOptionPane.showMessageDialog(null, "Not File");
-                        }
+                        MenuFrame.project.setActiveClass(file);
                     }
                 }
 
                 @Override
-                public void mousePressed(MouseEvent e) {
-
-                }
+                public void mousePressed(MouseEvent e) {}
 
                 @Override
-                public void mouseReleased(MouseEvent e) {
-
-                }
+                public void mouseReleased(MouseEvent e) {}
 
                 @Override
-                public void mouseEntered(MouseEvent e) {
-
-                }
+                public void mouseEntered(MouseEvent e) {}
 
                 @Override
-                public void mouseExited(MouseEvent e) {
+                public void mouseExited(MouseEvent e) {}
 
-                }
             });
         }
 
@@ -108,30 +99,23 @@ public class PathPanel extends JPanel{
                 }
 
                 @Override
-                public void mousePressed(MouseEvent e) {
-
-                }
+                public void mousePressed(MouseEvent e) {}
 
                 @Override
-                public void mouseReleased(MouseEvent e) {
-
-                }
+                public void mouseReleased(MouseEvent e) {}
 
                 @Override
-                public void mouseEntered(MouseEvent e) {
-
-                }
+                public void mouseEntered(MouseEvent e) {}
 
                 @Override
-                public void mouseExited(MouseEvent e) {
+                public void mouseExited(MouseEvent e) {}
 
-                }
             });
         }
 
     }
 
-    private class CatalogProject {
+    private static class CatalogProject {
 
         private final JPanel data;
         private final Map<String, CatalogProject> dirMap = new HashMap<>();
@@ -143,7 +127,7 @@ public class PathPanel extends JPanel{
 
         public void add(String project, List<String> dir) {
             project += "/" + dir.getFirst();
-            if (dirMap.containsKey(dir.getFirst()) && dir.size() > 1) {
+            if (dirMap.containsKey(dir.getFirst())) {
                 dirMap.get(dir.removeFirst()).add(project, dir);
             } else if (dir.size() > 1) {
                 CatalogProject newCatalog = new CatalogProject();
@@ -158,7 +142,7 @@ public class PathPanel extends JPanel{
                 data.add(indentPanel);
                 newCatalog.add(project, dir);
             } else {
-                ClassElements butten = new ClassElements(new File(project + ".java"));
+                ClassElements butten = new ClassElements(new JavaClassDocument(new  File(project + ".java")));
                 data.add(butten);
             }
         }
