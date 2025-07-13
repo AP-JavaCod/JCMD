@@ -11,19 +11,17 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
-import java.util.List;
 
 public class PathPanel extends JPanel{
 
 
     public PathPanel() {
         setLayout(new FlowLayout(FlowLayout.LEFT));
-        String[] f = Builder.getClassesFormat();
+        JavaClassDocument[] document = Builder.getDocument();
         CatalogProject catalog = new CatalogProject();
         String project = Builder.getProject().getPath() + "/src";
-        for (String s : f) {
-            List<String> data = new ArrayList<>(Arrays.asList(s.split("\\.")));
-            catalog.add(project, data);
+        for (JavaClassDocument s : document) {
+            catalog.add(project, s);
         }
         add(catalog.data);
     }
@@ -125,25 +123,29 @@ public class PathPanel extends JPanel{
             data.setLayout(new BoxLayout(data, BoxLayout.Y_AXIS));
         }
 
-        public void add(String project, List<String> dir) {
-            project += "/" + dir.getFirst();
-            if (dirMap.containsKey(dir.getFirst())) {
-                dirMap.get(dir.removeFirst()).add(project, dir);
-            } else if (dir.size() > 1) {
-                CatalogProject newCatalog = new CatalogProject();
-                DirElements butten = new DirElements(new File(project),newCatalog.data);
-                data.add(butten);
-                dirMap.put(dir.removeFirst(), newCatalog);
-                JPanel indentPanel = new JPanel();
-                indentPanel.setLayout(new BoxLayout(indentPanel, BoxLayout.X_AXIS));
-                indentPanel.add(Box.createHorizontalStrut(10));
-                indentPanel.add(newCatalog.data);
+        public void add(String project, JavaClassDocument document) {
+            String[] dir = document.getPaten().split("\\.");
+            CatalogProject old = this;
+            for (int i = 0; i < dir.length; i++) {
+                project += "/" + dir[i];
+                if (old.dirMap.containsKey(dir[i])) {
+                     old = old.dirMap.get(dir[i]);
+                } else if (i < dir.length -1) {
+                    CatalogProject newCatalog = new CatalogProject();
+                    DirElements butten = new DirElements(new File(project), newCatalog.data);
+                    old.data.add(butten);
+                    old.dirMap.put(dir[i], newCatalog);
+                    JPanel indentPanel = new JPanel();
+                    indentPanel.setLayout(new BoxLayout(indentPanel, BoxLayout.X_AXIS));
+                    indentPanel.add(Box.createHorizontalStrut(10));
+                    indentPanel.add(newCatalog.data);
 
-                data.add(indentPanel);
-                newCatalog.add(project, dir);
-            } else {
-                ClassElements butten = new ClassElements(new JavaClassDocument(new  File(project + ".java")));
-                data.add(butten);
+                    old.data.add(indentPanel);
+                    old = newCatalog;
+                } else {
+                    ClassElements butten = new ClassElements(document);
+                    old.data.add(butten);
+                }
             }
         }
 
