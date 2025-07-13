@@ -87,7 +87,7 @@ public class Builder {
     private static native String getProjectFile(long data);
 
     static {
-        System.loadLibrary("system/compilation/JICMD");
+        System.loadLibrary("./system/compilation/JICMD");
     }
 
 }
