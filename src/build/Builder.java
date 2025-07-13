@@ -1,5 +1,7 @@
 package build;
 
+import edit.JavaClassDocument;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -38,6 +40,7 @@ public class Builder {
        return run(data, mainClass.getPath(), name, version);
     }
 
+    @Deprecated
     public static File[] getClasses(){
         error();
         int size = sizeClasses(data);
@@ -48,6 +51,21 @@ public class Builder {
         return classes;
     }
 
+    public static JavaClassDocument[] getDocument(){
+        error();
+        int size = sizeClasses(data);
+        JavaClassDocument[] documents = new JavaClassDocument[size];
+        for (int i = 0; i < size; i++){
+            documents[i] = new JavaClassDocument(new File(getClassFile(data, i)));
+        }
+        return documents;
+    }
+
+    public static String getPathClass(File file){
+        return getPathClass(data, file.getPath());
+    }
+
+    @Deprecated
     public static String[] getClassesFormat(){
         error();
         int size = sizeClasses(data);
@@ -82,7 +100,10 @@ public class Builder {
 
     private static native String getClassFile(long data,int index);
 
+    @Deprecated
     private static native String getClassFormat(long data, int index);
+
+    private static native String getPathClass(long data, String name);
 
     private static native String getProjectFile(long data);
 
