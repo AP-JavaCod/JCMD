@@ -20,7 +20,10 @@ extern "C" {
 
 	JNIEXPORT jstring JNICALL Java_build_Builder_getClassFile(JNIEnv*, jobject, jlong, jint);
 
+	//Deprecated
 	JNIEXPORT jstring JNICALL Java_build_Builder_getClassFormat(JNIEnv*, jobject, jlong, jint);
+
+	JNIEXPORT jstring JNICALL Java_build_Builder_getPathClass(JNIEnv*, jobject, jlong, jstring);
 
 	JNIEXPORT jstring JNICALL Java_build_Builder_getProjectFile(JNIEnv*, jobject, jlong);
 
