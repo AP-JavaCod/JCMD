@@ -1,34 +1,33 @@
+#include "pch.h"
 #include "cmd.h"
 #include <fstream>
 #include <iostream>
 
-cmd_error::cmd_error(std::string error) {
-	this->is_error = true;
-	this->error = error;
+cmd_error::cmd_error(std::string message) : message{ message } {};
+
+std::string cmd_error::getMessage()
+{
+	return message;
 }
 
-cmd_error::cmd_error() {
-	is_error = false;
-	error = "Not problem";
-}
 
-cmd_error ranCmd(std::string cmd) {
-	const char* nameFileError = "Log_error.txt";
+
+void ranCmd(std::string cmd, std::filesystem::path dir) {
+	std::string nameFileError = dir.string() + "Log_error.txt";
 	std::string c = cmd + " 2> " + nameFileError;
-	if (system(c.c_str()) == 0) {
-		return cmd_error();
-	}
-	std::string ms;
-	std::string i;
-	std::ifstream in(nameFileError);
-	if (in.is_open()) {
-		while (std::getline(in, i)) {
-			ms += i + "\n";
+	if (system(c.c_str()) != 0) {
+		std::string ms;
+		std::string i;
+		std::ifstream in(nameFileError);
+		if (in.is_open()) {
+			while (std::getline(in, i)) {
+				ms += i + "\n";
+			}
 		}
+		in.close();
+		remove(nameFileError.c_str());
+		throw cmd_error(ms);
 	}
-	in.close();
-	remove(nameFileError);
-	return cmd_error(ms);
 }
 
 
@@ -71,33 +70,32 @@ std::string createJar(std::filesystem::path dir, const char* name) {
 	return std::string("rename " + dir.string() + ".zip " + name);
 }
 
-cmd_error compilation(java_build project) {
-	return ranCmd(createClass(project));
+void compilation(java_build project) {
+	ranCmd(createClass(project), project.build);
 }
 
-cmd_error build(java_build projet, const char* nameProject) {
-	cmd_error e_cmp = compilation(projet);
-	if (e_cmp.is_error) {
-		return e_cmp;
-	}
-
+void build(java_build projet, const char* nameProject) {
 	std::filesystem::path dir = projet.build.string() + "\\" + projet.project->nameProject.filename().string();
 	std::filesystem::create_directories(dir.string() + "\\META-INF");
 	createManifest(projet, dir.string() + "\\META-INF\\MANIFEST.MF");
-
-	cmd_error e_zip = ranCmd(createZip(dir));
-	if (e_zip.is_error) {
-		return e_zip;
-	}
-
-	cmd_error e_jar = ranCmd(createJar(dir, nameProject));
-	return e_jar;
+	system(createZip(dir).c_str());
+	system(createJar(dir, nameProject).c_str());
 }
 
-cmd_error runJar(java_build project, const char* projectNaim) {
-	cmd_error e_bild = build(project, projectNaim);
-	if (e_bild.is_error) {
-		return e_bild;
+std::string runJar(java_build project, const char* projectNaim) {
+	std::string file = project.build.string() + "\\result_data.txt";
+	std::string runCod = "java -jar " + project.build.string() + "\\" + projectNaim + " >> " + file;
+	ranCmd(runCod, file);
+	std::string ms;
+	std::string i;
+	std::ifstream in(file);
+	if (in.is_open()) {
+		while (std::getline(in, i)) {
+			ms += i + "\n";
+		}
 	}
-	return ranCmd("java -jar " + project.build.string() + "\\" + projectNaim);
+	in.close();
+	remove(file.c_str());
+	return ms;
+	
 }
