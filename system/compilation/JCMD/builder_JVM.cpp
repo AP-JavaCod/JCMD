@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "bulder_JVM.h"
-#include "cmd.h"
 
 JNIEXPORT void JNICALL Java_build_Builder_console(JNIEnv* env, jobject, jstring command) {
 	const char* cmd = env->GetStringUTFChars(command, nullptr);
@@ -25,8 +24,8 @@ JNIEXPORT void JNICALL Java_build_Builder_compilation(JNIEnv* env, jobject, jlon
 	try {
 		compilation(build);
 	}
-	catch (cmd_error e) {
-		env->ThrowNew(env->FindClass("build/JVMException"), e.getMessage().c_str());
+	catch (compilation_exception & ex) {
+		ex.throwJava(env);
 	}
 }
 
