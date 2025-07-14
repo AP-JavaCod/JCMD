@@ -16,9 +16,9 @@ public class JavaClassDocument extends DefaultStyledDocument {
     private String paten;
     private String oldText;
     private boolean isMainClass;
-    TypeJavaClass typeJavaClass = null;
+    private TypeJavaClass typeJavaClass = null;
 
-    public JavaClassDocument(File file){
+    public JavaClassDocument(File file) {
         fileClass = file;
         name = file.getName().split("\\.")[0];
         paten = Builder.getPathClass(file);
@@ -26,24 +26,24 @@ public class JavaClassDocument extends DefaultStyledDocument {
         isMainClass = setMainClass();
         try {
             super.insertString(0, oldText, null);
-        }catch (BadLocationException e){
+        } catch (BadLocationException e) {
             oldText = "";
         }
-        for (TypeJavaClass c : TypeJavaClass.values()){
+        for (TypeJavaClass c : TypeJavaClass.values()) {
             String type = c.NAME + " " + name;
-            if (oldText.contains(type)){
+            if (oldText.contains(type)) {
                 typeJavaClass = c;
                 break;
             }
         }
-        if (typeJavaClass == null){
+        if (typeJavaClass == null) {
             typeJavaClass = TypeJavaClass.CLASS;
         }
     }
 
     @Override
     public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-        String text = switch (str){
+        String text = switch (str) {
             case "{" -> "{\n" + getTabs(getTabPosition(offs)) + "}";
             case "\n" -> "\n" + getTabs(getTabPosition(offs));
             case "(" -> "()";
@@ -52,6 +52,10 @@ public class JavaClassDocument extends DefaultStyledDocument {
             default -> str;
         };
         super.insertString(offs, text, a);
+    }
+
+    public File getFileClass() {
+        return fileClass;
     }
 
     public String getName() {
@@ -70,7 +74,7 @@ public class JavaClassDocument extends DefaultStyledDocument {
         return typeJavaClass;
     }
 
-    public boolean isChanges(){
+    public boolean isChanges() {
         try {
             return !oldText.equals(getText(0, getLength()));
         } catch (BadLocationException e) {
@@ -78,21 +82,21 @@ public class JavaClassDocument extends DefaultStyledDocument {
         }
     }
 
-    public boolean save(){
+    public boolean save() {
         try {
             oldText = getText(0, getLength());
             FileManager.write(fileClass, oldText);
             return true;
-        }catch (BadLocationException e){
+        } catch (BadLocationException e) {
             return false;
         }
     }
 
-    private boolean setMainClass(){
+    private boolean setMainClass() {
         return oldText.contains("public static void main(String[]");
     }
 
-    private int getTabPosition(int end){
+    private int getTabPosition(int end) {
         try {
             int tab = 0;
             String text = getText(0, end).substring(0, end);
@@ -109,7 +113,7 @@ public class JavaClassDocument extends DefaultStyledDocument {
         }
     }
 
-    private String getTabs(int n){
+    private String getTabs(int n) {
         return "\t".repeat(Math.max(0, n));
     }
 
