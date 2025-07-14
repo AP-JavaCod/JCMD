@@ -28,7 +28,7 @@ public class PathPanel extends JPanel{
 
     private static class Elements extends JPanel{
 
-        private static final int d = 25;
+        private static final int d = 45;
         protected final JLabel ICON;
         protected final JLabel NAME;
 
@@ -41,6 +41,7 @@ public class PathPanel extends JPanel{
             g2.dispose();
             ICON = new JLabel(new ImageIcon(bufferedImage));
             NAME = new JLabel(name);
+            NAME.setFont(new Font(name, Font.BOLD, 15));
             add(ICON);
             add(NAME);
         }
@@ -137,7 +138,7 @@ public class PathPanel extends JPanel{
                     old.dirMap.put(dir[i], newCatalog);
                     JPanel indentPanel = new JPanel();
                     indentPanel.setLayout(new BoxLayout(indentPanel, BoxLayout.X_AXIS));
-                    indentPanel.add(Box.createHorizontalStrut(10));
+                    indentPanel.add(Box.createHorizontalStrut(25));
                     indentPanel.add(newCatalog.data);
 
                     old.data.add(indentPanel);
