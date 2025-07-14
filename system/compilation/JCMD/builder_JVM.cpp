@@ -2,6 +2,11 @@
 #include "bulder_JVM.h"
 #include "cmd.h"
 
+JNIEXPORT void JNICALL Java_build_Builder_console(JNIEnv* env, jobject, jstring command) {
+	const char* cmd = env->GetStringUTFChars(command, nullptr);
+	system(cmd);
+}
+
 JNIEXPORT jlong JNICALL Java_build_Builder_setData(JNIEnv* env, jobject, jstring name) {
 	std::filesystem::path path = env->GetStringUTFChars(name, nullptr);
 	java_project *project = new java_project(path);
@@ -13,21 +18,24 @@ JNIEXPORT void JNICALL Java_build_Builder_deleteData(JNIEnv*, jobject, jlong dat
 	delete project;
 }
 
-JNIEXPORT jstring JNICALL Java_build_Builder_compilation(JNIEnv* env, jobject, jlong data, jstring mainClass, jdouble version) {
+JNIEXPORT void JNICALL Java_build_Builder_compilation(JNIEnv* env, jobject, jlong data, jstring mainClass, jdouble version) {
 	java_project* project = reinterpret_cast<java_project*>(data);
 	std::filesystem::path path = env->GetStringUTFChars(mainClass, nullptr);
 	java_build build = project->setBuild(path, version);
-	std::string error = compilation(build).error;
-	return env->NewStringUTF(error.c_str());
+	try {
+		compilation(build);
+	}
+	catch (cmd_error e) {
+		env->ThrowNew(env->FindClass("build/JVMException"), e.getMessage().c_str());
+	}
 }
 
-JNIEXPORT jstring JNICALL Java_build_Builder_build(JNIEnv* env, jobject, jlong data, jstring mainClass, jstring name, jdouble version) {
+JNIEXPORT void JNICALL Java_build_Builder_build(JNIEnv* env, jobject, jlong data, jstring mainClass, jstring name, jdouble version) {
 	java_project* project = reinterpret_cast<java_project*>(data);
 	std::filesystem::path path = env->GetStringUTFChars(mainClass, nullptr);
 	const char* nameJAR = env->GetStringUTFChars(name, nullptr);
 	java_build javaBuild = project->setBuild(path, version);
-	std::string error = build(javaBuild, nameJAR).error;
-	return env->NewStringUTF(error.c_str());
+	build(javaBuild, nameJAR);
 }
 
 JNIEXPORT jstring JNICALL Java_build_Builder_run(JNIEnv* env, jobject, jlong data, jstring mainClass, jstring name, jdouble version) {
@@ -35,8 +43,8 @@ JNIEXPORT jstring JNICALL Java_build_Builder_run(JNIEnv* env, jobject, jlong dat
 	std::filesystem::path path = env->GetStringUTFChars(mainClass, nullptr);
 	const char* nameJAR = env->GetStringUTFChars(name, nullptr);
 	java_build javaBuild = project->setBuild(path, version);
-	std::string error = runJar(javaBuild, nameJAR).error;
-	return env->NewStringUTF(error.c_str());
+	std::string result = runJar(javaBuild, nameJAR);
+	return env->NewStringUTF(result.c_str());
 }
 
 JNIEXPORT jint JNICALL Java_build_Builder_sizeClasses(JNIEnv*, jobject, jlong data) {
@@ -47,16 +55,6 @@ JNIEXPORT jint JNICALL Java_build_Builder_sizeClasses(JNIEnv*, jobject, jlong da
 JNIEXPORT jstring JNICALL Java_build_Builder_getClassFile(JNIEnv* env, jobject, jlong data, jint index) {
 	java_project* project = reinterpret_cast<java_project*>(data);
 	std::string name = project->javaClasses[index].string();
-	return env->NewStringUTF(name.c_str());
-}
-
-
-//Deprecated
-JNIEXPORT jstring JNICALL Java_build_Builder_getClassFormat(JNIEnv* env, jobject, jlong data, jint index) {
-	java_project* project = reinterpret_cast<java_project*>(data);
-	std::filesystem::path path = project->javaClasses[index];
-	std::filesystem::path start = project->nameProject.string() + "\\src";
-	std::string name = getFormatPath(path, start);
 	return env->NewStringUTF(name.c_str());
 }
 
