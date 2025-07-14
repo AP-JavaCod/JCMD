@@ -1,22 +1,6 @@
 #pragma once
 #include "java_project.h"
-
-class cmd_error
-{
-
-public:
-
-	cmd_error(std::string);
-	
-	std::string getMessage();
-
-private:
-
-	std::string message;
-
-
-};
-
+#include "java_exception.h"
 
 void ranCmd(std::string, std::filesystem::path);
 
