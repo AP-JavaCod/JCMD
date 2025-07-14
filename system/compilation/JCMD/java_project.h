@@ -7,7 +7,7 @@ struct java_project;
 
 struct java_build {
 
-	java_build(){}
+	java_build(java_project*, std::filesystem::path, std::filesystem::path, double);
 
 	java_project* project;
 	std::filesystem::path build;
