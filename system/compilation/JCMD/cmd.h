@@ -1,20 +1,24 @@
 #pragma once
 #include "java_project.h"
 
-struct cmd_error
+class cmd_error
 {
 
+public:
+
 	cmd_error(std::string);
+	
+	std::string getMessage();
 
-	cmd_error();
+private:
 
-	std::string error;
-	bool is_error;
+	std::string message;
+
 
 };
 
 
-cmd_error ranCmd(std::string);
+void ranCmd(std::string, std::filesystem::path);
 
 std::string createClass(java_build);
 
@@ -24,8 +28,8 @@ std::string createZip(std::filesystem::path);
 
 std::string createJar(std::filesystem::path, const char*);
 
-cmd_error compilation(java_build);
+void compilation(java_build);
 
-cmd_error build(java_build, const char*);
+void build(java_build, const char*);
 
-cmd_error runJar(java_build, const char*);
+std::string runJar(java_build, const char*);
