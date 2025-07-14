@@ -7,13 +7,21 @@ import java.io.IOException;
 
 public class Builder {
 
-    private static long data =-1;
+    private static long data = -1;
+    private static File projectFile = null;
+    private static JavaClassDocument[] documents = null;
 
     public static void open(File file) throws IOException {
         if(isOpen()){
             throw new IOException();
         }
         data = setData(file.getPath());
+        projectFile = new File(getProjectFile(data));
+        int size = sizeClasses(data);
+        documents = new JavaClassDocument[size];
+        for (int i = 0; i < size; i++){
+            documents[i] = new JavaClassDocument(new File(getClassFile(data, i)));
+        }
     }
 
     public static boolean isOpen(){
@@ -27,57 +35,48 @@ public class Builder {
 
     public static String compilation(File mainClass, double version){
         error();
-        return compilation(data, mainClass.getPath(), version);
+        try {
+            compilation(data, mainClass.getPath(), version);
+            return "Not problem";
+        } catch (JVMException e) {
+            return e.getMessage();
+        }
     }
 
     public static String build(File mainClass, String name, double version){
         error();
-        return build(data, mainClass.getPath(), name, version);
+        try {
+            compilation(data, mainClass.getPath(), version);
+            build(data, mainClass.getPath(), name, version);
+            return "Not problem";
+        } catch (JVMException e) {
+            return e.getMessage();
+        }
     }
 
     public static String run(File mainClass, String name, double version){
        error();
-       return run(data, mainClass.getPath(), name, version);
-    }
-
-    @Deprecated
-    public static File[] getClasses(){
-        error();
-        int size = sizeClasses(data);
-        File[] classes = new File[size];
-        for (int i = 0; i < size; i++){
-            classes[i] = new File(getClassFile(data, i));
-        }
-        return classes;
+       try {
+           compilation(data, mainClass.getPath(), version);
+           build(data, mainClass.getPath(), name, version);
+           return run(data, mainClass.getPath(), name, version);
+       } catch (JVMException e) {
+           return e.getMessage();
+       }
     }
 
     public static JavaClassDocument[] getDocument(){
         error();
-        int size = sizeClasses(data);
-        JavaClassDocument[] documents = new JavaClassDocument[size];
-        for (int i = 0; i < size; i++){
-            documents[i] = new JavaClassDocument(new File(getClassFile(data, i)));
-        }
         return documents;
     }
 
     public static String getPathClass(File file){
+        error();
         return getPathClass(data, file.getPath());
     }
 
-    @Deprecated
-    public static String[] getClassesFormat(){
-        error();
-        int size = sizeClasses(data);
-        String[] classes = new String[size];
-        for (int i = 0; i < size; i++){
-            classes[i] = getClassFormat(data, i);
-        }
-        return classes;
-    }
-
     public static File getProject(){
-        return new File(getProjectFile(data));
+        return projectFile;
     }
 
     private static void error(){
@@ -86,13 +85,15 @@ public class Builder {
         }
     }
 
+    public static native void console(String command);
+
     private static native long setData(String path);
 
     private static native int deleteData(long data);
 
-    private static native String compilation(long data, String mainClass, double version);
+    private static native void compilation(long data, String mainClass, double version) throws JVMException;
 
-    private static native String build(long data, String mainClass, String name, double version);
+    private static native void build(long data, String mainClass, String name, double version);
 
     private static native  String run(long data, String mainClass, String name, double version);
 
@@ -100,15 +101,14 @@ public class Builder {
 
     private static native String getClassFile(long data,int index);
 
-    @Deprecated
-    private static native String getClassFormat(long data, int index);
-
     private static native String getPathClass(long data, String name);
 
     private static native String getProjectFile(long data);
 
     static {
+
         System.loadLibrary("./system/compilation/JICMD");
+
     }
 
 }
