@@ -6,12 +6,10 @@ import java.util.*;
 public class DataProject implements Observable{
 
     private JavaClassDocument activeClass = null;
-    private boolean isMainClass = false;
     private final List<Observer> observers = new ArrayList<>();
 
     public void setActiveClass(JavaClassDocument file){
         activeClass = file;
-        isMainClass = file.isMainClass();
         notifyObservers();
     }
 
