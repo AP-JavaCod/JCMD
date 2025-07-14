@@ -3,15 +3,6 @@
 #include <fstream>
 #include <iostream>
 
-cmd_error::cmd_error(std::string message) : message{ message } {};
-
-std::string cmd_error::getMessage()
-{
-	return message;
-}
-
-
-
 void ranCmd(std::string cmd, std::filesystem::path dir) {
 	std::string nameFileError = dir.string() + "Log_error.txt";
 	std::string c = cmd + " 2> " + nameFileError;
@@ -26,7 +17,7 @@ void ranCmd(std::string cmd, std::filesystem::path dir) {
 		}
 		in.close();
 		remove(nameFileError.c_str());
-		throw cmd_error(ms);
+		throw compilation_exception(ms.c_str());
 	}
 }
 
