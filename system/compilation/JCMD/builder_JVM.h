@@ -1,4 +1,6 @@
-#include <jni.h>
+#pragma once
+#include "java_exception.h"
+#include "cmd.h"
 
 #ifndef _Included_build_Builder
 #define _Included_build_Builder
