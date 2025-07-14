@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "java_project.h"
 
 java_project::java_project(std::filesystem::path nameProject) {
@@ -5,20 +6,19 @@ java_project::java_project(std::filesystem::path nameProject) {
 	parsJavaClass(nameProject);
 }
 
+java_build::java_build(java_project* project, std::filesystem::path mainClass, std::filesystem::path bild, double version) {
+	this->project = project;
+	this->mainClass = mainClass;
+	this->build = bild;
+	this->version = version;
+}
+
 java_build java_project::setBuild(std::filesystem::path mainClass, double version) {
-	java_build b;
-	b.project = this;
-	b.build = this->nameProject.string() + "\\bild";
-	b.mainClass = mainClass;
-	b.version = version;
+	java_build b(this, mainClass, this->nameProject.string() + "\\bild", version);
 	return b;
 }
 java_build java_project::setBuild(std::filesystem::path build, std::filesystem::path mainClass, double version) {
-	java_build b;
-	b.project = this;
-	b.build = build;
-	b.mainClass = mainClass;
-	b.version = version;
+	java_build b(this, mainClass, build, version);
 	return b;
 }
 
