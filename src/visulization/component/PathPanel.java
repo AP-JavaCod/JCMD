@@ -1,9 +1,8 @@
 package visulization.component;
 
-import build.Builder;
+import data.Observable;
+import data.Observer;
 import edit.JavaClassDocument;
-import visulization.MenuFrame;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -11,24 +10,42 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
-public class PathPanel extends JPanel{
+public class PathPanel extends JPanel implements Observable{
 
+    private JavaClassDocument activeClass = null;
+    private final List<Observer> observerList = new ArrayList<>();
 
-    public PathPanel() {
+    public PathPanel(JavaClassDocument[] documents, String project) {
         setLayout(new FlowLayout(FlowLayout.LEFT));
-        JavaClassDocument[] document = Builder.getDocument();
         CatalogProject catalog = new CatalogProject();
-        String project = Builder.getProject().getPath() + "/src";
-        for (JavaClassDocument s : document) {
-            catalog.add(project, s);
+        for (JavaClassDocument s : documents) {
+            catalog.add(project + "/src", s);
         }
         add(catalog.data);
     }
 
+    @Override
+    public void addObserver(Observer observer) {
+        observerList.add(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer d : observerList){
+            d.upData();
+        }
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        observerList.remove(observer);
+    }
+
     private static class Elements extends JPanel{
 
-        private static final int d = 45;
+        private static final int d = 35;
         protected final JLabel ICON;
         protected final JLabel NAME;
 
@@ -48,7 +65,11 @@ public class PathPanel extends JPanel{
 
     }
 
-    private static class ClassElements extends Elements {
+    public JavaClassDocument getActiveClass() {
+        return activeClass;
+    }
+
+    private class ClassElements extends Elements {
 
         private static final ImageIcon MAIN_CLASS = new ImageIcon("./system/icon/main_class.png");
         private static final ImageIcon JAVA_CLASS = new ImageIcon("./system/icon/java_class.png");
@@ -61,7 +82,8 @@ public class PathPanel extends JPanel{
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (SwingUtilities.isLeftMouseButton(e)) {
-                        MenuFrame.project.setActiveClass(file);
+                        activeClass = file;
+                        notifyObservers();
                     }
                 }
 
@@ -114,7 +136,7 @@ public class PathPanel extends JPanel{
 
     }
 
-    private static class CatalogProject {
+    private class CatalogProject {
 
         private final JPanel data;
         private final Map<String, CatalogProject> dirMap = new HashMap<>();
