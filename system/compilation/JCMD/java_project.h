@@ -23,7 +23,6 @@ struct java_project
 	std::filesystem::path nameProject;
 	std::vector<std::filesystem::path> javaClasses;
 
-	java_build setBuild(std::filesystem::path, double version);
 	java_build setBuild(std::filesystem::path, std::filesystem::path, double version);
 
 private:
