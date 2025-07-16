@@ -13,10 +13,6 @@ java_build::java_build(java_project* project, std::filesystem::path mainClass, s
 	this->version = version;
 }
 
-java_build java_project::setBuild(std::filesystem::path mainClass, double version) {
-	java_build b(this, mainClass, this->nameProject.string() + "\\bild", version);
-	return b;
-}
 java_build java_project::setBuild(std::filesystem::path build, std::filesystem::path mainClass, double version) {
 	java_build b(this, mainClass, build, version);
 	return b;
