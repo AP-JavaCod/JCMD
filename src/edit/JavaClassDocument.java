@@ -1,9 +1,7 @@
 package edit;
 
-import build.Builder;
 import data.FileManager;
 import edit.type.TypeJavaClass;
-
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
@@ -18,10 +16,10 @@ public class JavaClassDocument extends DefaultStyledDocument {
     private boolean isMainClass;
     private TypeJavaClass typeJavaClass = null;
 
-    public JavaClassDocument(File file) {
+    public JavaClassDocument(File file, String paten) {
         fileClass = file;
         name = file.getName().split("\\.")[0];
-        paten = Builder.getPathClass(file);
+        this.paten = paten;
         oldText = FileManager.reader(file);
         isMainClass = setMainClass();
         try {
